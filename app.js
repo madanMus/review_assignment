@@ -58,10 +58,22 @@ class ReviewAssignmentSolver {
             Papa.parse(file, {
                 header: hasHeader,
                 dynamicTyping: true,
-                skipEmptyLines: true,
+                skipEmptyLines: 'greedy',  // More aggressive at skipping empty lines in quoted fields
+                newline: '',  // Auto-detect newlines
+                quoteChar: '"',
+                escapeChar: '"',
                 complete: (results) => {
                     if (results.errors.length > 0) {
-                        reject(new Error(results.errors[0].message));
+                        // Log errors but be lenient with field mismatches
+                        console.log('CSV Parse Errors:', results.errors);
+                        const criticalErrors = results.errors.filter(e => 
+                            e.type !== 'FieldMismatch'
+                        );
+                        if (criticalErrors.length > 0) {
+                            reject(new Error(criticalErrors[0].message));
+                        } else {
+                            resolve(results.data);
+                        }
                     } else {
                         resolve(results.data);
                     }
