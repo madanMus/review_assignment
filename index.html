@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Assignment Tool</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+        
+        .privacy-note {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+        
+        .privacy-note strong {
+            color: #1976D2;
+        }
+        
+        .file-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px dashed #ddd;
+            transition: all 0.3s ease;
+        }
+        
+        .file-section:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .file-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .file-section small {
+            display: block;
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 0.85em;
+        }
+        
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            background: white;
+        }
+        
+        input[type="file"]:hover {
+            border-color: #667eea;
+        }
+        
+        .status {
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 0.9em;
+        }
+        
+        .status.loaded {
+            color: #28a745;
+        }
+        
+        .status.error {
+            color: #dc3545;
+        }
+        
+        .round-selection {
+            margin: 30px 0;
+            padding: 20px;
+            background: #fff3cd;
+            border-radius: 8px;
+        }
+        
+        .round-selection label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+            background: white;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        #results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        #results h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .result-section {
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .result-section h3 {
+            color: #28a745;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 0.9em;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 5px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .download-btn:hover {
+            background: #218838;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .warning-message {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .github-link {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .github-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .github-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Review Assignment Tool</h1>
+        <p class="subtitle">Automated review assignment using constraint satisfaction</p>
+        
+        <div class="privacy-note">
+            <strong>🔒 100% Private & Secure:</strong> All processing happens in your browser. 
+            No data is uploaded to any server. Your conference data never leaves your computer.
+        </div>
+        
+        <div class="file-section">
+            <label>PC Info <span class="status" id="status-pcinfo"></span></label>
+            <small>Download from HotCRP: Users → PC → Select All → Download "PC Info"</small>
+            <input type="file" id="pcinfo" accept=".csv" />
+        </div>
+        
+        <div class="file-section">
+            <label>Papers Data <span class="status" id="status-papers"></span></label>
+            <small>Download from HotCRP: Search → Select All → Download "Paper Information → CSV"</small>
+            <input type="file" id="papers" accept=".csv" />
+        </div>
+        
+        <div class="file-section">
+            <label>All Preferences <span class="status" id="status-prefs"></span></label>
+            <small>Download from HotCRP: Search → Select All → Download "PC Review Preferences"</small>
+            <input type="file" id="prefs" accept=".csv" />
+        </div>
+        
+        <div class="file-section">
+            <label>TPMS Scores <span class="status" id="status-tpms"></span></label>
+            <small>Format: paper,tpms_email,tpms_score (headerless CSV)</small>
+            <input type="file" id="tpms" accept=".csv" />
+        </div>
+        
+        <div class="file-section">
+            <label>TPMS Aliases <span class="status" id="status-aliases"></span></label>
+            <small>Format: tpms_email,alias_email (with header)</small>
+            <input type="file" id="aliases" accept=".csv" />
+        </div>
+        
+        <div class="file-section">
+            <label>PC Conflicts (Optional) <span class="status" id="status-conflicts"></span></label>
+            <small>Format: email,conflict_email</small>
+            <input type="file" id="conflicts" accept=".csv" />
+        </div>
+        
+        <div class="round-selection">
+            <label>Review Round</label>
+            <select id="round">
+                <option value="R1">Round 1 (R1)</option>
+                <option value="R2">Round 2 (R2)</option>
+                <option value="DL">Discussion Lead (DL)</option>
+            </select>
+        </div>
+        
+        <button id="solveBtn" disabled>Generate Review Assignments</button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Solving assignment problem... This may take a few moments.</p>
+        </div>
+        
+        <div id="results"></div>
+        
+        <div class="github-link">
+            <p>Open Source • <a href="https://github.com" target="_blank">View on GitHub</a></p>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
