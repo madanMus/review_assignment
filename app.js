@@ -58,25 +58,32 @@ class ReviewAssignmentSolver {
             Papa.parse(file, {
                 header: hasHeader,
                 dynamicTyping: true,
-                skipEmptyLines: 'greedy',  // More aggressive at skipping empty lines in quoted fields
-                newline: '',  // Auto-detect newlines
+                skipEmptyLines: 'greedy',
+                newline: '',
                 quoteChar: '"',
                 escapeChar: '"',
+                delimitersToGuess: [',', '\t', '|', ';'],
                 complete: (results) => {
                     if (results.errors.length > 0) {
-                        // Log errors but be lenient with field mismatches
+                        // Filter out non-critical errors
                         console.log('CSV Parse Errors:', results.errors);
                         const criticalErrors = results.errors.filter(e => 
-                            e.type !== 'FieldMismatch'
+                            e.type !== 'FieldMismatch' && e.type !== 'TooFewFields'
                         );
                         if (criticalErrors.length > 0) {
+                            console.warn('Critical errors found:', criticalErrors);
                             reject(new Error(criticalErrors[0].message));
-                        } else {
-                            resolve(results.data);
+                            return;
                         }
-                    } else {
-                        resolve(results.data);
                     }
+                    // Filter out any completely empty rows
+                    const cleanData = results.data.filter(row => {
+                        if (hasHeader) {
+                            return Object.values(row).some(v => v !== null && v !== '');
+                        }
+                        return Array.isArray(row) ? row.some(v => v !== null && v !== '') : true;
+                    });
+                    resolve(cleanData);
                 },
                 error: (error) => reject(error)
             });
